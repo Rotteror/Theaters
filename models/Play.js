@@ -5,7 +5,7 @@ const schema = new Schema({
     description: { type: String, required: true, maxLength: [50, 'Symbols cannot be more than 50'] },
     imageUrl: { type: String, required: true },
     isPublic: { type: Boolean, required: true },
-    createdAt: { type: Data, required: true, default: Date.now },
+    createdAt: { type: Date, required: true, default: Date.now },
     userLikes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
 
