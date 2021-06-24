@@ -3,6 +3,7 @@ const { isUser, isOwner } = require('../middlewares/guards');
 const { parseError } = require('../util/parser');
 const { preloadPlay } = require('../middlewares/preloads');
 const { checkPlayForLikes } = require('../util/checkLikes');
+const { body, validationResult } = require('express-validator');
 
 
 router.get('/create', isUser(), async (req, res) => {
@@ -70,39 +71,42 @@ router.get('/edit/:id', preloadPlay(), isUser(), async (req, res) => {
     }
 })
 
-router.post('/edit/:id', isUser(), async (req, res) => {
+router.post('/edit/:id', isUser(),
+    body('title').trim().notEmpty().withMessage('Tittle should be not empty'),
+    body('description').trim().notEmpty().withMessage('Description should be not empty').bail().
+        isLength({ max: 50 }).withMessage('Description cannot be more than 50 charachters'),
+    body('imageUrl').trim().notEmpty().withMessage('ImageUrl should be not empty'),
+    async (req, res) => {
 
-    if (req.body.author != req.user_id) {
-        throw new Error('Invalid operation')
-    }
+        try {
+            const play = {
+                title: req.body.title,
+                description: req.body.description,
+                imageUrl: req.body.imageUrl,
+                public: Boolean(req.body.public),
 
-    try {
-        const play = {
-            title: req.body.title,
-            description: req.body.description,
-            imageUrl: req.body.imageUrl,
-            public: Boolean(req.body.public),
+            }
+            await req.storage.editPlay(req.params.id, play);
+            res.redirect('/')
+        } catch (err) {
+            console.log(err.message);
+            const play = {
+                _id: req.params.id,
+                title: req.body.title,
+                description: req.body.description,
+                imageUrl: req.body.imageUrl,
+                public: Boolean(req.body.public),
+
+            }
+            const ctx = {
+                errors: parseError(err),
+                play
+            }
+            console.log(ctx)
+            res.render('play/edit', ctx)
 
         }
-        await req.storage.editPlay(req.params.id, play);
-        res.redirect('/')
-    } catch (err) {
-        console.log(err.message);
-        const play = {
-            title: req.body.title,
-            description: req.body.description,
-            imageUrl: req.body.imageUrl,
-            public: Boolean(req.body.public),
-
-        }
-        const ctx = {
-            errors: parseError(err),
-            play
-        }
-        res.render('play/edit', ctx)
-
-    }
-})
+    })
 
 
 router.get('/like/:id', async (req, res) => {
@@ -125,12 +129,14 @@ router.get('/delete/:id', isUser(), async (req, res) => {
 })
 
 
-router.get('/sort/desc', async (req, res)=> {
-
+router.get('/sort/desc', async (req, res) => {
+    const plays = await req.storage.sortByDates();
+    res.render('home', { plays })
 })
 
-router.get('/sort/likes', async (req, res)=> {
-    
+router.get('/sort/likes', async (req, res) => {
+    const plays = await req.storage.sortByLikes();
+    res.render('home', { plays })
 })
 
 

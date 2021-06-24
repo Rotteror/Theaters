@@ -64,6 +64,18 @@ async function likePlay(userId, playId) {
 
 }
 
+async function sortByDates() {
+    const plays = await Play.find({}).sort({ createdAt: -1 }).lean();
+    console.log(plays)
+    return plays;
+}
+
+async function sortByLikes() {
+    const plays = await Play.find({}).sort({ userLikes: -1 }).lean();
+    console.log(plays)
+    return plays;
+}
+
 module.exports = {
     createPlay,
     getAllPlays,
@@ -71,4 +83,6 @@ module.exports = {
     getPlayById,
     deletePlay,
     likePlay,
+    sortByDates,
+    sortByLikes
 }
