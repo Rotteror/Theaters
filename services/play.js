@@ -1,4 +1,6 @@
 const Play = require('../models/Play');
+const User = require('../models/User');
+const { checkPlayForLikes } = require('../util/checkLikes');
 
 
 async function createPlay(playData) {
@@ -29,10 +31,37 @@ async function editPlay(id, play) {
 
 async function deletePlay(id) {
     const play = await Play.findById(id);
-    if(!play){
+    if (!play) {
         throw new Error('Invalid data');
     }
     return play.deleteOne();
+}
+
+async function likePlay(userId, playId) {
+
+    const currentUser = await User.findById(userId);
+    const currentPlay = await Play.findById(playId);
+    if (!currentUser) {
+        throw new Error('Invalid username')
+    }
+
+    if (!currentPlay) {
+        throw new Error("Invalid play");
+    }
+
+    const playLiked = checkPlayForLikes(currentPlay, userId);
+
+    if (!playLiked) {
+        currentPlay.userLikes.push(currentUser);
+        currentUser.likedPlays.push(currentPlay);
+        return Promise.all([(
+            currentPlay.save(),
+            currentUser.save())
+        ]);
+    } else {
+        throw new Error('Invalid operation -> You already liked this Play dumb ass ')
+    }
+
 }
 
 module.exports = {
@@ -41,4 +70,5 @@ module.exports = {
     editPlay,
     getPlayById,
     deletePlay,
+    likePlay,
 }
