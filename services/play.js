@@ -2,10 +2,10 @@ const Play = require('../models/Play');
 
 
 async function createPlay(playData) {
-    const play = new Play(hotelData);
+    const play = new Play(playData);
     await play.save();
 
-    return hotel;
+    return play;
 }
 
 async function getAllPlays() {
@@ -14,7 +14,7 @@ async function getAllPlays() {
 }
 
 async function getPlayById(id) {
-    const play = await Play.findById(id);
+    const play = await Play.findById(id).lean();
     return play;
 }
 
@@ -28,7 +28,11 @@ async function editPlay(id, play) {
 }
 
 async function deletePlay(id) {
-
+    const play = await Play.findById(id);
+    if(!play){
+        throw new Error('Invalid data');
+    }
+    return play.deleteOne();
 }
 
 module.exports = {

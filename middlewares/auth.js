@@ -38,17 +38,20 @@ async function register(username, password) {
 
     return generateToken(user);
 }
-
 async function login(username, password) {
 
     const user = await userService.getUserByUsername(username);
     if (!user) {
-        throw new Error('No account with this username');
+        const err = new Error('No account with this username');
+        err.type = 'credential';
+        throw err;
     }
 
     const hasMatch = await bcrypt.compare(password, user.hashedPassword);
     if (!hasMatch) {
-        throw new Error('Invalid password');
+        const err = new Error('Invalid password')
+        err.type = 'credential';
+        throw err;
     }
 
     //aply jwt -> User

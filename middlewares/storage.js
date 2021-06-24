@@ -1,11 +1,11 @@
-const user = require('../services/user')
-const play = require('../services/play')
+const userService = require('../services/user')
+const playService = require('../services/play')
 
 module.exports = () => (req, res, next) => {
     //TO DO import and decorate services 
     req.storage = {
-        ...user,
-       
+        ...userService,
+        ...playService
     };
 
     next();

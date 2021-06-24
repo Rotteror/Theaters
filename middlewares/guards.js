@@ -20,11 +20,11 @@ function isGuest() {
 //TODO => THIS FUNCTION NEEDS REFACTORING
 function isOwner() {
     return (req, res, next) => {
-        // if (req.data.hotel && req.user && (req.data.hotel.owner == req.user._id)) {
-        //     next();
-        // } else {
-        //     res.redirect('/auth/login');
-        // }
+        if (req.data.play && req.user && (req.data.play.author == req.user._id)) {
+            next();
+        } else {
+            res.redirect('/auth/login');
+        }
     }
 }
 

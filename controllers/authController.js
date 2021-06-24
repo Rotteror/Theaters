@@ -49,10 +49,13 @@ router.post('/login', async (req, res) => {
         await req.auth.login(req.body.username, req.body.password);
         res.redirect('/');
     } catch (err) {
-        console.log('im here')
-        console.log(err.message)
+        console.log(err.message);
+        let errors = [err.message];
+        if (err.type == 'credential') {
+            errors = ['Incorrect Username or Password']
+        }
         const ctx = {
-            erorrs: [err.message],
+            errors,
             userData: {
                 username: req.body.username,
             }
